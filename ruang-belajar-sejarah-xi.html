@@ -1,0 +1,1376 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>Ruang Belajar — Materi & Kuis Interaktif</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1220;
+      --surface: #121d2e;
+      --surface-2: #172438;
+      --surface-3: #0d1827;
+      --line: #283950;
+      --text: #edf3fb;
+      --muted: #a6b5c9;
+      --accent: #8bd3c7;
+      --accent-2: #b7a8ff;
+      --good: #8dd7a8;
+      --bad: #ff9b9b;
+      --shadow: 0 18px 50px rgba(0,0,0,.24);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      background: radial-gradient(circle at 12% 0%, #1b2c45 0, transparent 35%), var(--bg);
+      font: 16px/1.58 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .shell { width: min(1060px, calc(100% - 34px)); margin: 0 auto; padding: 26px 0 48px; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 32px; }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .logo { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 15px; background: linear-gradient(140deg, var(--accent), var(--accent-2)); color: #101827; font-size: 21px; font-weight: 950; box-shadow: 0 8px 25px #8bd3c733; }
+    .brand-name { font-weight: 850; letter-spacing: .2px; }
+    .brand-sub { color: var(--muted); font-size: 12px; margin-top: 1px; }
+    .top-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .btn { border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); color: var(--text); padding: 10px 14px; font-weight: 700; transition: .16s ease; }
+    .btn:hover:not(:disabled) { border-color: #718ca9; transform: translateY(-1px); }
+    .btn.primary { background: var(--accent); color: #0b1720; border-color: var(--accent); }
+    .btn.subtle { background: transparent; }
+    .btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+    .hero { margin: 8px 0 23px; }
+    .eyebrow { color: var(--accent); font-size: 11px; font-weight: 850; letter-spacing: 1.7px; text-transform: uppercase; }
+    .hero h1 { margin: 8px 0 9px; font-size: clamp(29px, 5vw, 46px); line-height: 1.12; letter-spacing: -1.3px; overflow-wrap: anywhere; }
+    .hero p { max-width: 720px; margin: 0; color: var(--muted); }
+    .course-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .meta-chip { color: #cbd8e8; background: #142338; border: 1px solid var(--line); padding: 5px 10px; border-radius: 999px; font-size: 12px; }
+    .tabs { display: flex; gap: 7px; width: max-content; max-width: 100%; padding: 6px; margin: 25px 0 19px; border: 1px solid var(--line); border-radius: 16px; background: #0e1928; }
+    .tab { border: 0; border-radius: 11px; padding: 9px 17px; background: transparent; color: var(--muted); font-weight: 800; }
+    .tab.active { background: #26394f; color: var(--text); }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 14px; margin: 22px 2px 14px; }
+    .section-head h2 { margin: 0; font-size: 20px; }
+    .section-head p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+    .counter { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .progress-wrap { height: 7px; margin: 0 2px 18px; border-radius: 99px; overflow: hidden; background: #1d2b40; }
+    .progress { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .22s ease; }
+    .lesson-card, .quiz-card, .result-card, .empty-card {
+      border: 1px solid var(--line); border-radius: 24px;
+      background: linear-gradient(145deg, #192a40, #111d2e); box-shadow: var(--shadow);
+    }
+    .lesson-card { position: relative; min-height: 330px; padding: clamp(22px, 5vw, 43px); overflow: hidden; touch-action: pan-y; }
+    .lesson-card::after { content: ""; position: absolute; width: 250px; height: 250px; top: -130px; right: -120px; border-radius: 50%; background: #8bd3c70d; pointer-events: none; }
+    .card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 19px; }
+    .pill { padding: 5px 10px; border: 1px solid #476d70; border-radius: 99px; color: var(--accent); font-size: 11px; font-weight: 850; letter-spacing: .4px; }
+    .lesson-card h3 { max-width: 770px; margin: 0 0 15px; font-size: clamp(23px, 4vw, 32px); line-height: 1.22; letter-spacing: -.4px; }
+    .lesson-content { max-width: 790px; color: #d9e4f1; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .info-box { margin-top: 21px; padding: 14px 16px; border: 1px solid #2b4058; border-radius: 14px; background: var(--surface-3); }
+    .info-box strong { display: block; margin-bottom: 5px; color: var(--accent); font-size: 11px; letter-spacing: .7px; text-transform: uppercase; }
+    .info-box p { margin: 0; color: #dce7f3; white-space: pre-wrap; }
+    .card-controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 15px; }
+    .dots { display: flex; flex: 1; justify-content: center; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .dot { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 99px; background: #40516a; }
+    .dot.active { width: 23px; background: var(--accent); }
+    .hint { margin: 12px 0 0; color: #8395aa; text-align: center; font-size: 12px; }
+    .quiz-card, .empty-card { padding: clamp(20px, 4vw, 34px); }
+    .q-meta { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 14px; color: var(--muted); font-size: 12px; letter-spacing: .4px; }
+    .quiz-card h3 { margin: 0 0 20px; font-size: clamp(20px, 3vw, 27px); line-height: 1.35; }
+    .options { display: grid; gap: 10px; }
+    .option { display: flex; align-items: flex-start; gap: 12px; padding: 13px 15px; border: 1px solid #334760; border-radius: 14px; background: #111e2f; cursor: pointer; transition: .15s ease; }
+    .option:hover { border-color: #829bb6; }
+    .option.selected { border-color: var(--accent); background: #1b3440; }
+    .option input { appearance: none; width: 18px; height: 18px; flex: none; display: grid; place-items: center; margin: 3px 0 0; border: 2px solid #8296ad; border-radius: 50%; }
+    .option input:checked { border-color: var(--accent); }
+    .option input:checked::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .option.correct { border-color: var(--good); background: #173329; }
+    .option.wrong { border-color: var(--bad); background: #39242b; }
+    .option-text { flex: 1; }
+    .feedback { display: none; margin-top: 17px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 13px; background: #0d1927; }
+    .feedback.show { display: block; }
+    .feedback strong { display: block; margin-bottom: 4px; }
+    .feedback p { margin: 0; color: #cbd8e7; white-space: pre-wrap; }
+    .quiz-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+    .result-card { padding: 36px 24px; text-align: center; }
+    .score { margin: 10px; color: var(--accent); font-size: 58px; font-weight: 950; line-height: 1.1; letter-spacing: -2px; }
+    .result-card > p { color: var(--muted); }
+    .review { max-width: 720px; margin: 24px auto 0; text-align: left; }
+    .review-item { padding: 14px 0; border-top: 1px solid var(--line); }
+    .review-item p { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
+    .empty-card { color: var(--muted); text-align: center; padding: 42px 22px; }
+    .essay-list { display: grid; gap: 15px; }
+    .essay-card { padding: clamp(18px, 3vw, 27px); border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(145deg, #192a40, #111d2e); box-shadow: var(--shadow); }
+    .essay-card h3 { margin: 9px 0 11px; font-size: 19px; line-height: 1.35; }
+    .essay-prompt { white-space: pre-wrap; color: #d9e4f1; margin: 0 0 14px; }
+    .essay-answer { display: block; width: 100%; min-height: 150px; resize: vertical; padding: 13px 14px; border: 1px solid #344960; border-radius: 12px; background: #0b1625; color: var(--text); font: inherit; }
+    .essay-card-actions { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+    .essay-status { color: var(--muted); font-size: 12px; }
+    .essay-guide { display: none; margin-top: 13px; padding: 14px 16px; border: 1px solid #3a526a; border-radius: 13px; background: #0d1927; }
+    .essay-guide.show { display: block; }
+    .essay-guide strong { display: block; margin-bottom: 7px; color: var(--accent); }
+    .essay-guide ul { margin: 0; padding-left: 20px; color: #d5e0ed; }
+    .essay-guide li + li { margin-top: 5px; }
+    .source-note { margin-top: 24px; padding: 15px 17px; border: 1px solid var(--line); border-radius: 15px; background: #0e1928; color: var(--muted); font-size: 12px; }
+    .source-note a { color: var(--accent); }
+
+    .hidden { display: none !important; }
+    footer { margin-top: 30px; color: #71849c; text-align: center; font-size: 12px; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 18px; background: #020711d9; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(760px, 100%); max-height: 91vh; overflow: auto; padding: 23px; border: 1px solid #344a63; border-radius: 20px; background: #142237; box-shadow: 0 25px 80px #0009; }
+    .modal h2 { margin: 0 0 5px; }
+    .modal-intro { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+    .modal-tabs { display: flex; gap: 7px; margin-bottom: 13px; }
+    .modal-tab { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--muted); font-weight: 750; }
+    .modal-tab.active { background: #26394f; color: var(--text); }
+    .modal textarea { display: block; width: 100%; min-height: 245px; resize: vertical; padding: 13px; border: 1px solid #344960; border-radius: 12px; outline: none; background: #0b1625; color: #e9f1fb; font: 13px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .modal textarea:focus { border-color: var(--accent); }
+    .modal-actions { display: flex; justify-content: space-between; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 13px; }
+    .modal-actions .right { display: flex; gap: 8px; flex-wrap: wrap; }
+    .status { min-height: 20px; margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .error { color: #ffb2b2; }
+    @media (max-width: 650px) {
+      .shell { width: min(100% - 22px, 1060px); padding-top: 16px; }
+      header { align-items: flex-start; margin-bottom: 24px; }
+      .brand-sub { display: none; }
+      .top-actions { max-width: 58%; }
+      .top-actions .btn { padding: 8px 10px; font-size: 12px; }
+      .tabs { width: 100%; }
+      .tab { flex: 1; padding: 9px 6px; }
+      .lesson-card { min-height: 350px; }
+      .card-controls .btn { padding: 9px 11px; font-size: 13px; }
+      .hint { font-size: 11px; }
+    }
+    @media (max-width: 390px) {
+      .logo { width: 38px; height: 38px; }
+      .brand-name { font-size: 14px; }
+      .top-actions { max-width: 62%; }
+      .top-actions .btn { font-size: 11px; padding: 8px; }
+      .card-controls { gap: 6px; }
+      .card-controls .btn { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">R</div>
+        <div><div class="brand-name">Ruang Belajar</div><div class="brand-sub">Belajar bertahap, pahami lebih dalam</div></div>
+      </div>
+      <div class="top-actions">
+        <button class="btn subtle" id="promptBtn" type="button">Prompt AI</button>
+        <button class="btn" id="importBtn" type="button">Masukkan materi</button>
+        <button class="btn subtle" id="exportBtn" type="button" title="Simpan materi sebagai file JSON">Ekspor</button>
+      </div>
+    </header>
+
+    <section class="hero" aria-live="polite">
+      <div class="eyebrow">Ruang belajar interaktif</div>
+      <h1 id="pageTitle">Belajar satu kartu demi satu kartu.</h1>
+      <p id="pageSubtitle">Pahami materi terlebih dahulu, lalu uji pemahamanmu lewat kuis pilihan tunggal.</p>
+      <div class="course-meta">
+        <span class="meta-chip" id="lessonMeta">0 kartu materi</span>
+        <span class="meta-chip" id="questionMeta">0 soal pilihan ganda</span>
+        <span class="meta-chip" id="essayMeta">0 soal uraian</span>
+        <span class="meta-chip">Satu jawaban benar per soal</span>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Navigasi belajar">
+      <button class="tab active" data-tab="lessons" type="button">Materi</button>
+      <button class="tab" data-tab="quiz" type="button">Latihan soal</button>
+      <button class="tab" data-tab="essays" type="button">Uraian</button>
+      <button class="tab" data-tab="results" type="button">Hasil</button>
+    </nav>
+
+    <section id="lessonsView">
+      <div class="section-head">
+        <div><h2>Jelajahi materi</h2><p>Geser kartu atau gunakan tombol untuk berpindah.</p></div>
+        <span class="counter" id="lessonCount">1 / 3</span>
+      </div>
+      <div class="progress-wrap"><div class="progress" id="lessonProgress"></div></div>
+      <article class="lesson-card" id="lessonCard" aria-live="polite">
+        <div class="card-top"><span class="pill" id="lessonTag">PENGANTAR</span><span class="counter" id="lessonNumber">KARTU 01</span></div>
+        <h3 id="lessonTitle">Selamat datang</h3>
+        <div class="lesson-content" id="lessonContent"></div>
+        <div class="info-box" id="exampleBox"><strong>Contoh</strong><p id="lessonExample"></p></div>
+        <div class="info-box" id="keyBox"><strong>Ingat poin ini</strong><p id="lessonKey"></p></div>
+      </article>
+      <div class="card-controls">
+        <button class="btn" id="prevLesson" type="button">← Sebelumnya</button>
+        <div class="dots" id="lessonDots" aria-label="Pilih kartu materi"></div>
+        <button class="btn primary" id="nextLesson" type="button">Berikutnya →</button>
+      </div>
+      <p class="hint">Di ponsel, geser kartu ke kiri atau kanan. Di komputer, gunakan tombol panah kiri dan kanan.</p>
+    </section>
+
+    <section id="quizView" class="hidden">
+      <div class="section-head"><div><h2>Uji pemahaman</h2><p>Pilih satu jawaban yang paling tepat pada setiap soal.</p></div><span class="counter" id="quizCount">Soal 1 / 5</span></div>
+      <div class="progress-wrap"><div class="progress" id="quizProgress"></div></div>
+      <div id="quizMount"></div>
+    </section>
+
+    <section id="essaysView" class="hidden">
+      <div class="section-head"><div><h2>Latihan uraian</h2><p>Tulis dengan bahasamu sendiri, lalu buka pedoman untuk memeriksa kelengkapan jawaban.</p></div><span class="counter" id="essayCount"></span></div>
+      <div id="essaysMount"></div>
+    </section>
+
+    <section id="resultsView" class="hidden">
+      <div class="section-head"><div><h2>Hasil belajarmu</h2><p>Nilai dan pembahasan jawabanmu.</p></div></div>
+      <div id="resultMount" class="empty-card">Selesaikan latihan soal untuk melihat hasil dan pembahasanmu.</div>
+    </section>
+
+    <div class="source-note">
+      <strong>Catatan sumber:</strong> Struktur topik mengikuti kisi-kisi PSAS Sejarah Gasal 2026/2027 yang diunggah. Penjelasan materi diperluas agar indikator dapat dipelajari, dengan rujukan tambahan dari <a href="https://repositori.kemendikdasmen.go.id/36513/1/Sejarah-BG-KLS-XI.pdf" target="_blank" rel="noopener">Buku Panduan Guru Sejarah Kelas XI, Kemdikbudristek</a> dan <a href="https://www.mext.go.jp/b_menu/hakusho/html/others/detail/1317259.htm" target="_blank" rel="noopener">Kementerian Pendidikan Jepang (MEXT), pendidikan era Meiji</a>. Cocokkan istilah dan penekanan akhir dengan catatan guru.
+    </div>
+    <footer>Ruang Belajar · Berjalan langsung di browser · Jawaban uraian tersimpan pada perangkat ini</footer>
+  </main>
+
+  <div class="modal-backdrop" id="importModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 id="modalTitle">Siapkan materi belajar</h2>
+      <p class="modal-intro">Minta AI menyusun materi menjadi kartu dan soal, lalu tempel hasil JSON-nya ke aplikasi ini.</p>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="promptModeBtn" type="button">1. Prompt untuk AI</button>
+        <button class="modal-tab" id="jsonModeBtn" type="button">2. Tempel hasil JSON</button>
+      </div>
+      <section id="promptPanel">
+        <textarea id="promptInput" spellcheck="false" aria-label="Prompt untuk AI"></textarea>
+        <div class="modal-actions"><span class="status" id="promptStatus">Salin prompt ini, lalu kirim bersama file atau teks materi ke AI.</span><div class="right"><button class="btn primary" id="copyPromptBtn" type="button">Salin prompt</button></div></div>
+      </section>
+      <section id="jsonPanel" class="hidden">
+        <textarea id="jsonInput" spellcheck="false" placeholder="Tempel JSON hasil AI di sini..." aria-label="JSON hasil AI"></textarea>
+        <div class="status" id="importStatus" role="status"></div>
+        <div class="modal-actions"><button class="btn subtle" id="sampleBtn" type="button">Muat contoh</button><div class="right"><button class="btn" id="closeModal" type="button">Tutup</button><button class="btn primary" id="applyJson" type="button">Terapkan materi</button></div></div>
+      </section>
+      <div class="modal-actions" id="modalBottom"><button class="btn subtle" id="closePromptModal" type="button">Tutup</button><div class="right"><button class="btn" id="goJsonBtn" type="button">Sudah punya JSON? Lanjut →</button></div></div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+
+  const demo = {
+  "title": "PSAS Sejarah XI",
+  "subtitle": "Latihan berdasarkan kisi-kisi PSAS Gasal 2026/2027 · SMKN Tengaran. Pelajari kartu, kerjakan kuis, lalu latih jawaban uraian.",
+  "lessons": [
+    {
+      "title": "Jepang sebelum Restorasi Meiji",
+      "tag": "JEPANG SEBELUM MEIJI",
+      "content": "Sebelum Restorasi Meiji tahun 1868, Jepang berada di bawah pemerintahan Keshogunan Tokugawa. Kaisar tetap menjadi lambang kekaisaran, tetapi kekuasaan pemerintahan sehari-hari berada di tangan shogun. Masyarakat tersusun secara hierarkis, termasuk golongan samurai, petani, pengrajin, dan pedagang.\n\nJepang bukan sepenuhnya tanpa hubungan dengan dunia luar, tetapi hubungan luar negerinya dibatasi ketat. Kebijakan pembatasan ini dikenal sebagai sakoku. Kontak dagang dan pengetahuan asing tetap berlangsung secara terbatas, antara lain melalui Nagasaki.",
+      "example": "Bayangkan sebuah negara yang membatasi sebagian besar hubungan luar negerinya dan mengendalikan siapa yang boleh berdagang atau masuk. Itulah gambaran umum kebijakan sakoku, bukan berarti seluruh hubungan luar negeri benar-benar terputus.",
+      "key": "Tokugawa memegang kekuasaan pemerintahan melalui shogun; sakoku berarti pembatasan ketat hubungan dengan dunia luar, bukan isolasi mutlak."
+    },
+    {
+      "title": "Sakoku, tekanan Barat, dan Restorasi Meiji",
+      "tag": "RESTORASI MEIJI",
+      "content": "Pada abad ke-19, kedatangan kekuatan Barat meningkatkan tekanan agar Jepang membuka pelabuhannya. Peristiwa kedatangan Komodor Matthew Perry pada 1853 dan perjanjian Kanagawa 1854 menjadi bagian penting dari perubahan tersebut. Ketidakpuasan terhadap keshogunan ikut mendorong perubahan politik.\n\nRestorasi Meiji pada 1868 mengembalikan kekuasaan pemerintahan kepada kaisar dan mengakhiri dominasi Keshogunan Tokugawa. Pemerintah baru kemudian membangun negara yang lebih terpusat serta mempercepat modernisasi pemerintahan, pendidikan, industri, transportasi, dan militer.",
+      "example": "Perubahan dari kekuasaan shogun menuju pemerintahan pusat di bawah Kaisar Meiji menunjukkan perubahan struktur politik, bukan sekadar pergantian nama pemimpin.",
+      "key": "Restorasi Meiji dimulai pada 1868 dan menjadi titik penting modernisasi Jepang."
+    },
+    {
+      "title": "Modernisasi pendidikan Jepang",
+      "tag": "PENDIDIKAN MEIJI",
+      "content": "Pemerintah Meiji mengirim pelajar dan ahli Jepang ke luar negeri untuk mempelajari ilmu pengetahuan, teknologi, hukum, kedokteran, teknik, dan sistem pendidikan. Pada saat yang sama, pemerintah mengundang pengajar serta tenaga ahli asing untuk membantu membangun sekolah dan lembaga pendidikan.\n\nDampak jangka panjangnya adalah bertambahnya tenaga terdidik, berkembangnya kemampuan sains dan teknologi, tersusunnya lembaga pendidikan modern, serta tumbuhnya tenaga ahli Jepang sendiri. Setelah belajar di luar negeri, sebagian pelajar kembali dan ikut menggantikan tenaga ahli asing.",
+      "example": "Pelajar yang belajar teknik di luar negeri dapat kembali untuk mengembangkan industri, sekolah teknik, atau infrastruktur di negaranya.",
+      "key": "Mengirim pelajar ke luar negeri dan mengundang guru asing bertujuan menyerap ilmu modern, lalu membangun kemampuan bangsa sendiri."
+    },
+    {
+      "title": "Perang Pasifik dan ekspansi Jepang",
+      "tag": "PERANG PASIFIK",
+      "content": "Pada awal abad ke-20, Jepang berkembang menjadi kekuatan industri dan militer. Untuk mempertahankan mesin perang dan industrinya, Jepang membutuhkan bahan mentah serta wilayah strategis. Jepang memperluas pengaruhnya di Asia Timur dan Pasifik, hingga berhadapan dengan kekuatan Barat.\n\nPada 7 Desember 1941 waktu Hawaii, Jepang menyerang pangkalan Amerika Serikat di Pearl Harbor. Pada waktu yang berdekatan Jepang juga menyerang wilayah-wilayah yang dikuasai Inggris dan Amerika di Asia-Pasifik. Rangkaian serangan ini menandai meluasnya Perang Pasifik.",
+      "example": "Serangan Pearl Harbor bukan satu-satunya serangan awal Jepang. Pada waktu yang hampir bersamaan, Jepang juga bergerak ke wilayah Asia Tenggara dan Pasifik.",
+      "key": "Ingat hubungan antara ekspansi Jepang, kebutuhan sumber daya, serangan Pearl Harbor pada 7 Desember 1941 waktu Hawaii, dan meluasnya Perang Pasifik."
+    },
+    {
+      "title": "Mengapa Jepang datang ke Indonesia?",
+      "tag": "KEDATANGAN JEPANG",
+      "content": "Ada tiga alasan utama yang dapat digunakan untuk menjelaskan kedatangan Jepang ke Indonesia.\n\n1. Sumber daya alam: Jepang membutuhkan minyak bumi, karet, timah, dan bahan mentah lain untuk industri serta perang.\n2. Letak strategis: wilayah Indonesia penting untuk jalur pelayaran, pangkalan militer, dan penguasaan kawasan Asia Tenggara.\n3. Ambisi ekspansi: Jepang ingin memperluas kekuasaan dan membangun dominasi di Asia dengan propaganda Kemakmuran Bersama Asia Timur Raya.\n\nPropaganda Jepang menyebut kedatangannya sebagai pembebasan Asia dari kolonialisme Barat, tetapi tujuan kekuasaan dan kebutuhan perang tetap menjadi kepentingan utama Jepang.",
+      "example": "Minyak bumi menjadi sumber daya yang sangat penting untuk menggerakkan kendaraan, kapal, pesawat, dan mesin perang.",
+      "key": "Tiga faktor utama: sumber daya alam, posisi strategis, dan ambisi ekspansi/penguasaan kawasan."
+    },
+    {
+      "title": "Mengapa sebagian rakyat menyambut Jepang?",
+      "tag": "SAMBUTAN RAKYAT",
+      "content": "Pada awal kedatangannya, sebagian masyarakat menyambut Jepang dengan harapan penjajahan Belanda berakhir. Jepang memanfaatkan sentimen anti-Belanda, menggunakan propaganda sebagai sesama bangsa Asia, dan mengaku akan membebaskan bangsa-bangsa Asia dari kekuasaan Barat. Kekalahan cepat Belanda juga membuat Jepang tampak kuat.\n\nSambutan awal itu tidak berarti seluruh rakyat mendukung Jepang. Setelah pendudukan berlangsung, kerja paksa, pengambilan hasil pertanian, pembatasan kebebasan, dan kekerasan membuat banyak rakyat mengalami penderitaan serta melakukan perlawanan.",
+      "example": "Sebuah masyarakat bisa menyambut kedatangan penguasa baru karena berharap keadaan membaik, tetapi kemudian menolak ketika kebijakan penguasa baru justru menindas.",
+      "key": "Sambutan awal dipengaruhi propaganda anti-Barat dan harapan lepas dari Belanda; pengalaman pendudukan kemudian menimbulkan kekecewaan dan perlawanan."
+    },
+    {
+      "title": "Propaganda Gerakan 3A",
+      "tag": "GERAKAN 3A",
+      "content": "Jepang melancarkan propaganda untuk menarik simpati dan mengarahkan dukungan rakyat. Salah satu propaganda yang dikenal adalah Gerakan 3A. Jargon atau semboyannya adalah:\n\n• Nippon Cahaya Asia\n• Nippon Pelindung Asia\n• Nippon Pemimpin Asia\n\nGerakan ini berusaha menggambarkan Jepang sebagai pemimpin dan pelindung bangsa-bangsa Asia. Tujuan utamanya adalah memperoleh dukungan masyarakat bagi kepentingan pendudukan dan perang Jepang.",
+      "example": "Jika soal menanyakan jargon Gerakan 3A, ingat tiga kata kunci: cahaya, pelindung, dan pemimpin Asia.",
+      "key": "3A = Nippon Cahaya Asia, Nippon Pelindung Asia, Nippon Pemimpin Asia. Tujuan propaganda: menarik simpati dan dukungan rakyat."
+    },
+    {
+      "title": "PUTERA dan Empat Serangkai",
+      "tag": "PUTERA",
+      "content": "Pusat Tenaga Rakyat (PUTERA) dibentuk Jepang pada 1943. Tokoh pemimpinnya dikenal sebagai Empat Serangkai, yaitu Soekarno, Mohammad Hatta, Ki Hajar Dewantara, dan K.H. Mas Mansyur.\n\nJepang berharap PUTERA dapat mengerahkan tenaga dan dukungan rakyat bagi kepentingan perang. Namun, para tokoh nasionalis juga memanfaatkan ruang organisasi dan kesempatan berbicara untuk menumbuhkan kesadaran kebangsaan, menyampaikan gagasan, serta menggalang dukungan bagi kepentingan Indonesia.",
+      "example": "Satu organisasi dapat dibentuk oleh penguasa untuk kepentingannya, tetapi tokoh yang terlibat dapat berusaha memakai ruang yang tersedia untuk tujuan bangsa sendiri.",
+      "key": "Empat Serangkai: Soekarno, Mohammad Hatta, Ki Hajar Dewantara, dan K.H. Mas Mansyur. Jangan tertukar antara tujuan Jepang dan cara tokoh nasionalis memanfaatkannya."
+    },
+    {
+      "title": "Kebijakan pendudukan Jepang",
+      "tag": "KEBIJAKAN JEPANG",
+      "content": "Pemerintahan militer Jepang mengatur kehidupan politik, ekonomi, sosial, dan budaya untuk mendukung perang. Kebijakannya mencakup pengerahan romusha atau tenaga kerja paksa, pengumpulan hasil pertanian, pengawasan organisasi, propaganda, serta pembatasan kebebasan. Bahasa Belanda dilarang digunakan secara resmi, sementara bahasa Indonesia semakin luas dipakai.\n\nDampak negatifnya sangat berat: penderitaan tenaga kerja, kekurangan pangan, kemiskinan, tekanan, dan korban jiwa. Ada pula dampak tidak langsung yang kemudian dimanfaatkan bangsa Indonesia, seperti pengalaman organisasi, kesempatan sebagian tokoh masuk lembaga pemerintahan, penggunaan bahasa Indonesia yang makin luas, serta pelatihan militer bagi sebagian pemuda.",
+      "example": "Romusha adalah pengerahan tenaga kerja secara paksa untuk proyek-proyek yang mendukung kepentingan Jepang. Ini berbeda dari pekerjaan sukarela dengan upah dan pilihan bebas.",
+      "key": "Dampak negatif utama: romusha, pengambilan hasil bumi, kekurangan pangan, penindasan. Dampak tidak langsung: pengalaman organisasi, penggunaan bahasa Indonesia, dan pengalaman militer."
+    },
+    {
+      "title": "Organisasi militer dan semi-militer",
+      "tag": "ORGANISASI JEPANG",
+      "content": "Jepang membentuk organisasi untuk mengerahkan masyarakat dan memperkuat pertahanan. Beberapa organisasi penting: \n\n• PETA (Pembela Tanah Air): melatih orang Indonesia menjadi pasukan untuk membantu pertahanan wilayah.\n• Heiho: pasukan pembantu yang menjadi bagian dari kesatuan militer Jepang.\n• Seinendan: barisan pemuda yang diarahkan untuk latihan kedisiplinan dan pertahanan.\n• Keibodan: barisan pembantu polisi untuk membantu keamanan.\n• Fujinkai: organisasi perempuan yang dimobilisasi untuk kegiatan pendukung perang.\n\nTujuan Jepang adalah memobilisasi tenaga, menjaga keamanan, dan memperkuat perang. Pengalaman berorganisasi serta latihan militer kemudian memberi sebagian orang Indonesia pengalaman yang berguna dalam perjuangan berikutnya.",
+      "example": "PETA dan Heiho sama-sama berkaitan dengan militer, tetapi kedudukannya berbeda: PETA dibentuk sebagai pasukan pertahanan wilayah, sedangkan Heiho menjadi pasukan pembantu militer Jepang.",
+      "key": "PETA = pasukan pertahanan wilayah; Heiho = pembantu militer Jepang; Seinendan = pemuda; Keibodan = pembantu polisi; Fujinkai = perempuan."
+    },
+    {
+      "title": "Tiga strategi perlawanan terhadap Jepang",
+      "tag": "STRATEGI PERLAWANAN",
+      "content": "Perlawanan bangsa Indonesia terhadap Jepang dilakukan dengan beragam strategi.\n\n1. Kooperatif: bekerja melalui organisasi atau lembaga bentukan Jepang, tetapi berusaha memanfaatkan kesempatan untuk kepentingan bangsa.\n2. Nonkooperatif/bawah tanah: bergerak secara rahasia di luar organisasi resmi Jepang, menyebarkan informasi, menjaga semangat kebangsaan, dan membangun jaringan.\n3. Perlawanan bersenjata: melakukan pemberontakan atau perlawanan langsung ketika penindasan tidak dapat diterima.\n\nTidak ada satu strategi yang selalu cocok untuk semua keadaan. Pilihan strategi bergantung pada kondisi, risiko, tujuan, dan kesempatan yang tersedia.",
+      "example": "Tokoh yang memanfaatkan organisasi resmi untuk menyampaikan gagasan nasionalis menggunakan strategi kooperatif. Kelompok yang mengadakan pertemuan rahasia tanpa diketahui Jepang menggunakan strategi bawah tanah.",
+      "key": "Kooperatif = memanfaatkan ruang resmi; bawah tanah/nonkooperatif = bergerak rahasia di luar lembaga resmi; bersenjata = perlawanan langsung."
+    },
+    {
+      "title": "Contoh perlawanan di berbagai daerah",
+      "tag": "PERLAWANAN DAERAH",
+      "content": "Penindasan Jepang memicu perlawanan di berbagai wilayah. Contoh yang sering dipelajari:\n\n• Perlawanan PETA di Blitar pada 14 Februari 1945, yang berkaitan dengan tokoh Supriyadi.\n• Perlawanan di Singaparna, Tasikmalaya, yang dipimpin K.H. Zainal Mustafa pada 1944.\n• Perlawanan di Aceh, termasuk perlawanan Cot Plieng yang dipimpin Teungku Abdul Jalil pada 1942.\n\nLatar belakangnya beragam, antara lain penindasan, kewajiban yang dipaksakan, penghinaan terhadap keyakinan, serta penderitaan rakyat. Perlawanan ini menunjukkan bahwa pendudukan Jepang tidak diterima begitu saja.",
+      "example": "Jika soal menghubungkan Blitar, PETA, dan Supriyadi, peristiwa yang dimaksud adalah pemberontakan PETA Blitar pada Februari 1945.",
+      "key": "Blitar = PETA/Supriyadi (1945); Singaparna = K.H. Zainal Mustafa (1944); Cot Plieng, Aceh = Teungku Abdul Jalil (1942)."
+    },
+    {
+      "title": "Kekalahan Jepang dan berakhirnya Perang Pasifik",
+      "tag": "JEPANG MENYERAH",
+      "content": "Menjelang 1945, posisi militer Jepang semakin terdesak oleh Sekutu. Amerika Serikat menjatuhkan bom atom di Hiroshima pada 6 Agustus 1945 dan Nagasaki pada 9 Agustus 1945. Uni Soviet juga menyatakan perang terhadap Jepang pada 8 Agustus 1945 dan menyerang pasukan Jepang di Manchuria. Tekanan militer dan kehancuran tersebut mempercepat keputusan Jepang untuk menyerah.\n\nJepang mengumumkan menerima penyerahan pada 15 Agustus 1945. Penandatanganan dokumen penyerahan secara resmi dilakukan pada 2 September 1945. Kekalahan Jepang menciptakan situasi politik yang sangat penting bagi bangsa Indonesia untuk memproklamasikan kemerdekaan.",
+      "example": "Jepang tidak menyerah karena satu peristiwa saja. Pengeboman Hiroshima dan Nagasaki, serangan Soviet, serta kekalahan di berbagai front merupakan rangkaian tekanan yang harus dilihat bersama.",
+      "key": "Hiroshima 6 Agustus; Nagasaki 9 Agustus; Soviet menyatakan perang 8 Agustus; Jepang mengumumkan menyerah 15 Agustus 1945."
+    },
+    {
+      "title": "BPUPKI: pengertian, tokoh, dan tujuan",
+      "tag": "BPUPKI",
+      "content": "BPUPKI adalah singkatan yang lazim digunakan untuk Badan Penyelidik Usaha-usaha Persiapan Kemerdekaan Indonesia, dengan nama Jepang Dokuritsu Junbi Cosakai. Badan ini dibentuk pada masa pendudukan Jepang untuk menyelidiki dan membahas hal-hal penting bagi persiapan kemerdekaan.\n\nKetua BPUPKI adalah Dr. K.R.T. Radjiman Wedyodiningrat. Tokoh penting lain yang terlibat antara lain R.P. Soeroso dan Ichibangase Yosio sebagai wakil ketua, serta anggota-anggota dari berbagai kalangan Indonesia.\n\nSidang pertama berlangsung 29 Mei–1 Juni 1945 dan membahas dasar negara. Sidang kedua berlangsung 10–17 Juli 1945 dan membahas rancangan Undang-Undang Dasar serta hal-hal terkait bentuk negara.",
+      "example": "Jika soal menanyakan siapa ketua BPUPKI, jawabannya adalah Dr. Radjiman Wedyodiningrat. Jika menanyakan tujuan, fokus pada penyelidikan dan pembahasan persiapan kemerdekaan.",
+      "key": "BPUPKI = badan penyelidik persiapan kemerdekaan; ketua = Dr. Radjiman Wedyodiningrat; sidang I membahas dasar negara; sidang II membahas rancangan UUD."
+    },
+    {
+      "title": "PPKI dan pertemuan di Dalat",
+      "tag": "PPKI & DALAT",
+      "content": "Setelah BPUPKI menyelesaikan tugasnya, Jepang membentuk PPKI (Panitia Persiapan Kemerdekaan Indonesia) pada 7 Agustus 1945. PPKI dipimpin Soekarno sebagai ketua dan Mohammad Hatta sebagai wakil ketua. Tugasnya berkaitan dengan persiapan langkah konkret menuju kemerdekaan dan pembentukan negara.\n\nPada 12 Agustus 1945, Soekarno, Mohammad Hatta, dan Dr. Radjiman Wedyodiningrat bertemu Marsekal Hisaichi Terauchi di Dalat, Vietnam. Dalam pertemuan itu dibicarakan rencana kemerdekaan Indonesia dan persiapan yang akan dilakukan melalui PPKI. Setelah Jepang menyerah, para pemimpin Indonesia menghadapi desakan agar kemerdekaan segera diproklamasikan atas keputusan bangsa sendiri.",
+      "example": "Tiga tokoh Indonesia yang dipanggil ke Dalat adalah Soekarno, Mohammad Hatta, dan Dr. Radjiman Wedyodiningrat. Tokoh Jepang yang mereka temui adalah Marsekal Terauchi.",
+      "key": "PPKI dibentuk 7 Agustus 1945; ketua Soekarno; wakil ketua Mohammad Hatta. Pertemuan Dalat 12 Agustus 1945 melibatkan Soekarno, Hatta, Radjiman, dan Terauchi."
+    },
+    {
+      "title": "Perbedaan Golongan Muda dan Golongan Tua",
+      "tag": "MENJELANG PROKLAMASI",
+      "content": "Setelah Jepang menyerah pada 15 Agustus 1945, muncul perbedaan pandangan tentang cara memproklamasikan kemerdekaan.\n\nGolongan Muda mendesak agar kemerdekaan segera diproklamasikan atas kekuatan dan keputusan bangsa Indonesia sendiri, tanpa menunggu keputusan Jepang atau menggunakan PPKI yang dibentuk Jepang. Mereka khawatir kemerdekaan akan dianggap sebagai hadiah Jepang dan kesempatan politik akan hilang.\n\nGolongan Tua, termasuk Soekarno dan Hatta, memilih langkah yang lebih hati-hati. Mereka mempertimbangkan keselamatan rakyat, situasi politik, dan rencana melalui PPKI agar proses kemerdekaan lebih terorganisasi. Perbedaan ini merupakan perbedaan strategi dan waktu, bukan perbedaan tujuan akhir: Indonesia merdeka.",
+      "example": "Golongan Muda mengutamakan proklamasi segera dan lepas dari pengaruh Jepang; Golongan Tua mengutamakan pertimbangan situasi dan jalur persiapan yang lebih teratur.",
+      "key": "Tujuan sama: kemerdekaan. Perbedaannya terletak pada waktu, cara, dan keterlibatan PPKI/Jepang."
+    },
+    {
+      "title": "Rapat 15 Agustus dan Peristiwa Rengasdengklok",
+      "tag": "RENGASDENGKLOK",
+      "content": "Pada 15 Agustus 1945, golongan muda mengadakan rapat yang dipimpin Chaerul Saleh. Mereka menegaskan bahwa kemerdekaan harus diproklamasikan oleh bangsa Indonesia sendiri dan tidak digantungkan pada janji atau keputusan Jepang maupun PPKI.\n\nPada dini hari 16 Agustus 1945, golongan muda membawa Soekarno dan Hatta ke Rengasdengklok. Tujuannya menjauhkan kedua tokoh dari pengaruh Jepang sekaligus mendesak agar proklamasi segera dilakukan. Peristiwa ini dipicu kabar menyerahnya Jepang dan perbedaan pendapat tentang cara serta waktu proklamasi.",
+      "example": "Urutan yang perlu diingat: Jepang mengumumkan menyerah 15 Agustus → rapat golongan muda → Soekarno-Hatta dibawa ke Rengasdengklok pada 16 Agustus.",
+      "key": "Rapat Chaerul Saleh: kemerdekaan harus diputuskan bangsa Indonesia. Rengasdengklok: mendesak proklamasi segera dan menjauhkan Soekarno-Hatta dari pengaruh Jepang."
+    },
+    {
+      "title": "Kesepakatan kembali ke Jakarta",
+      "tag": "JALAN MENUJU PROKLAMASI",
+      "content": "Ketegangan antara golongan muda dan golongan tua diselesaikan melalui perundingan. Achmad Soebardjo dari golongan tua dan Wikana dari golongan muda ikut berperan dalam mencapai kesepakatan. Achmad Soebardjo memberikan jaminan bahwa proklamasi akan dilaksanakan pada 17 Agustus 1945.\n\nSetelah kesepakatan tercapai, Soekarno dan Hatta kembali ke Jakarta pada 16 Agustus 1945. Peristiwa ini menunjukkan pentingnya dialog dan kompromi ketika terdapat perbedaan strategi.",
+      "example": "Nama yang sering dipasangkan dalam soal: Wikana mewakili golongan muda dan Achmad Soebardjo mewakili golongan tua.",
+      "key": "Kesepakatan: proklamasi dilaksanakan 17 Agustus 1945; Soekarno-Hatta kembali ke Jakarta."
+    },
+    {
+      "title": "Perumusan teks dan pembacaan Proklamasi",
+      "tag": "17 AGUSTUS 1945",
+      "content": "Setelah kembali ke Jakarta, perumusan naskah proklamasi dilakukan di rumah Laksamana Tadashi Maeda. Tempat ini dipilih karena relatif aman untuk pertemuan dan Maeda memberikan ruang serta perlindungan. Naskah dirumuskan oleh Soekarno, Mohammad Hatta, dan Achmad Soebardjo. Sayuti Melik kemudian mengetik naskah hasil perumusan.\n\nProklamasi dibacakan oleh Soekarno pada 17 Agustus 1945 di Jalan Pegangsaan Timur No. 56, Jakarta. Mohammad Hatta mendampingi Soekarno. Proklamasi menjadi pernyataan kemerdekaan sekaligus awal pembentukan negara Indonesia merdeka.",
+      "example": "Bedakan tempat penyusunan naskah dan tempat pembacaan: penyusunan di rumah Laksamana Maeda; pembacaan di Pegangsaan Timur 56.",
+      "key": "Naskah dirumuskan di rumah Laksamana Maeda; diketik Sayuti Melik; dibacakan Soekarno pada 17 Agustus 1945 di Pegangsaan Timur 56."
+    },
+    {
+      "title": "Nilai perjuangan dan kolaborasi keahlian",
+      "tag": "REFLEKSI",
+      "content": "Proklamasi merupakan hasil perjuangan banyak pihak dan beragam kemampuan. Pemimpin menyusun keputusan, golongan muda mendorong percepatan, jurnalis menyebarkan informasi, fotografer mendokumentasikan peristiwa, teknisi radio membantu komunikasi, tokoh agama menguatkan masyarakat, serta pengusaha dan warga dapat mendukung kebutuhan logistik.\n\nPelajaran untuk dunia kerja masa kini adalah bahwa tujuan besar sering tercapai melalui kolaborasi orang dengan kompetensi berbeda. Perbedaan pendapat perlu diselesaikan melalui komunikasi, pembagian peran, tanggung jawab, dan fokus pada kepentingan bersama.",
+      "example": "Dalam sebuah proyek teknologi, programmer membangun sistem, desainer merancang tampilan, dokumentator mencatat proses, dan koordinator menyatukan pekerjaan. Hasil terbaik muncul ketika keahlian berbeda bekerja menuju tujuan yang sama.",
+      "key": "Nilai utama: persatuan, gotong royong, komunikasi, keberanian, tanggung jawab, dan kolaborasi lintas keahlian."
+    }
+  ],
+  "questions": [
+    {
+      "topic": "Jepang sebelum Meiji",
+      "level": "Dasar",
+      "question": "Pada masa sebelum Restorasi Meiji, siapa yang memegang kekuasaan pemerintahan sehari-hari di Jepang?",
+      "options": [
+        "Shogun dari Keshogunan Tokugawa",
+        "Kaisar sebagai kepala pemerintahan langsung",
+        "Perdana Menteri yang dipilih rakyat",
+        "Gubernur jenderal dari pemerintah Inggris"
+      ],
+      "answer": 0,
+      "explanation": "Keshogunan Tokugawa menjalankan pemerintahan sehari-hari. Kaisar tetap menjadi simbol kekaisaran, tetapi kekuasaan politik praktis berada pada shogun."
+    },
+    {
+      "topic": "Sakoku",
+      "level": "Dasar",
+      "question": "Apa makna kebijakan sakoku yang diterapkan Jepang pada masa Tokugawa?",
+      "options": [
+        "Pembatasan ketat hubungan Jepang dengan dunia luar",
+        "Pembukaan semua pelabuhan bagi perdagangan bebas",
+        "Penghapusan seluruh pemerintahan daerah",
+        "Pengiriman semua samurai ke negara Barat"
+      ],
+      "answer": 0,
+      "explanation": "Sakoku merujuk pada kebijakan pembatasan hubungan luar negeri. Hubungan asing tidak sepenuhnya hilang, tetapi dibatasi dan dikendalikan."
+    },
+    {
+      "topic": "Restorasi Meiji",
+      "level": "Menengah",
+      "question": "Apa dampak jangka panjang dari kebijakan mengirim pelajar Jepang ke luar negeri dan mengundang guru asing pada era Meiji?",
+      "options": [
+        "Berkembangnya tenaga terdidik dan kemampuan ilmu pengetahuan modern",
+        "Berakhirnya seluruh kegiatan pendidikan di Jepang",
+        "Berkurangnya kemampuan teknologi karena ketergantungan permanen",
+        "Kembalinya sistem pemerintahan shogun"
+      ],
+      "answer": 0,
+      "explanation": "Pelajar mempelajari ilmu dan teknologi di luar negeri, sementara guru asing membantu pendidikan di Jepang. Dalam jangka panjang, Jepang membangun tenaga ahli dan lembaga pendidikan modern."
+    },
+    {
+      "topic": "Perang Pasifik",
+      "level": "Dasar",
+      "question": "Serangan Jepang ke pangkalan Amerika Serikat di Pearl Harbor pada 7 Desember 1941 waktu Hawaii menjadi salah satu peristiwa yang menandai meluasnya perang di kawasan apa?",
+      "options": [
+        "Pasifik",
+        "Mediterania",
+        "Amerika Selatan",
+        "Skandinavia"
+      ],
+      "answer": 0,
+      "explanation": "Serangan Pearl Harbor menjadi penanda penting meluasnya Perang Pasifik. Pada waktu berdekatan, Jepang juga menyerang wilayah Inggris dan Amerika di Asia-Pasifik."
+    },
+    {
+      "topic": "Kedatangan Jepang",
+      "level": "Dasar",
+      "question": "Manakah yang merupakan alasan utama Jepang datang dan menduduki Indonesia?",
+      "options": [
+        "Menguasai sumber daya alam dan wilayah strategis untuk mendukung perang",
+        "Membantu Indonesia membangun demokrasi tanpa kepentingan militer",
+        "Mencari wilayah kosong untuk penelitian arkeologi",
+        "Menghindari seluruh perdagangan di kawasan Asia"
+      ],
+      "answer": 0,
+      "explanation": "Indonesia memiliki minyak bumi, karet, dan sumber daya lain serta posisi strategis. Jepang ingin menguasainya untuk menopang industri, perang, dan ekspansi kawasan."
+    },
+    {
+      "topic": "Sambutan rakyat",
+      "level": "Menengah",
+      "question": "Mengapa sebagian masyarakat Indonesia pada awalnya menyambut kedatangan Jepang?",
+      "options": [
+        "Mereka berharap kekuasaan Belanda berakhir dan percaya propaganda pembebasan Asia",
+        "Jepang langsung memberikan kemerdekaan penuh pada hari pertama",
+        "Semua rakyat telah mengetahui kebijakan romusha sebelum Jepang tiba",
+        "Jepang menghapus seluruh kewajiban produksi dan pajak"
+      ],
+      "answer": 0,
+      "explanation": "Sentimen anti-Belanda, propaganda Jepang sebagai sesama bangsa Asia, dan kekalahan cepat Belanda menimbulkan harapan bahwa Jepang akan membebaskan Indonesia. Harapan itu kemudian banyak berubah karena penindasan."
+    },
+    {
+      "topic": "Propaganda",
+      "level": "Dasar",
+      "question": "Apa nama gerakan propaganda Jepang yang dikenal sebagai Gerakan 3A?",
+      "options": [
+        "Gerakan Nippon Cahaya, Pelindung, dan Pemimpin Asia",
+        "Gerakan Asia Merdeka, Bersatu, dan Makmur",
+        "Gerakan Tiga Bangsa untuk Demokrasi",
+        "Gerakan Rakyat, Buruh, dan Petani"
+      ],
+      "answer": 0,
+      "explanation": "Jargon 3A adalah Nippon Cahaya Asia, Nippon Pelindung Asia, dan Nippon Pemimpin Asia."
+    },
+    {
+      "topic": "Gerakan 3A",
+      "level": "Menengah",
+      "question": "Apa isi tiga jargon propaganda Gerakan 3A yang digunakan Jepang di Indonesia?",
+      "options": [
+        "Nippon Cahaya Asia, Nippon Pelindung Asia, Nippon Pemimpin Asia",
+        "Asia Merdeka, Asia Bersatu, Asia Berdaulat",
+        "Nippon Sahabat Asia, Nippon Guru Asia, Nippon Pembela Dunia",
+        "Indonesia Cahaya Timur, Indonesia Pelindung Timur, Indonesia Pemimpin Timur"
+      ],
+      "answer": 0,
+      "explanation": "Jargon Gerakan 3A adalah Nippon Cahaya Asia, Nippon Pelindung Asia, dan Nippon Pemimpin Asia."
+    },
+    {
+      "topic": "PUTERA",
+      "level": "Dasar",
+      "question": "Siapa saja tokoh Empat Serangkai yang memimpin PUTERA?",
+      "options": [
+        "Soekarno, Mohammad Hatta, Ki Hajar Dewantara, dan K.H. Mas Mansyur",
+        "Soekarno, Sutan Sjahrir, Ahmad Soebardjo, dan Sayuti Melik",
+        "Mohammad Hatta, Jenderal Sudirman, Supriyadi, dan Tan Malaka",
+        "Ki Hajar Dewantara, Radjiman Wedyodiningrat, Wikana, dan Chaerul Saleh"
+      ],
+      "answer": 0,
+      "explanation": "Empat Serangkai terdiri atas Soekarno, Mohammad Hatta, Ki Hajar Dewantara, dan K.H. Mas Mansyur."
+    },
+    {
+      "topic": "PUTERA",
+      "level": "Sulit",
+      "question": "Bagaimana tokoh nasionalis Indonesia memanfaatkan organisasi PUTERA?",
+      "options": [
+        "Menggunakan ruang organisasi untuk menumbuhkan kesadaran dan semangat kebangsaan",
+        "Menyerahkan seluruh keputusan politik Indonesia kepada pemerintah Jepang",
+        "Membubarkan semua organisasi pergerakan nasional",
+        "Membantu Jepang menghapus penggunaan bahasa Indonesia"
+      ],
+      "answer": 0,
+      "explanation": "Walaupun Jepang membentuk PUTERA untuk mengerahkan dukungan rakyat, tokoh nasionalis memanfaatkan kesempatan berkumpul dan berbicara untuk membangun kesadaran kebangsaan."
+    },
+    {
+      "topic": "Pendudukan Jepang",
+      "level": "Menengah",
+      "question": "Manakah contoh dampak negatif pendudukan Jepang di Indonesia?",
+      "options": [
+        "Romusha dan pengerahan hasil pertanian secara paksa",
+        "Perluasan kebebasan politik dan pers yang sepenuhnya bebas",
+        "Penghapusan semua kewajiban rakyat kepada pemerintah militer",
+        "Pemberian kemerdekaan tanpa syarat pada 1942"
+      ],
+      "answer": 0,
+      "explanation": "Romusha dan pengumpulan hasil pertanian secara paksa menimbulkan penderitaan, kekurangan pangan, serta korban jiwa."
+    },
+    {
+      "topic": "Organisasi Jepang",
+      "level": "Menengah",
+      "question": "Apa perbedaan yang tepat antara PETA dan Heiho?",
+      "options": [
+        "PETA merupakan pasukan pertahanan wilayah, sedangkan Heiho menjadi pasukan pembantu militer Jepang",
+        "PETA merupakan organisasi perempuan, sedangkan Heiho adalah organisasi pemuda",
+        "PETA membantu polisi, sedangkan Heiho mengelola sekolah",
+        "PETA adalah organisasi rahasia anti-Jepang, sedangkan Heiho organisasi pers"
+      ],
+      "answer": 0,
+      "explanation": "PETA dibentuk sebagai pasukan pertahanan wilayah, sedangkan Heiho merupakan pasukan pembantu yang menjadi bagian dari kesatuan militer Jepang."
+    },
+    {
+      "topic": "Strategi perlawanan",
+      "level": "Menengah",
+      "question": "Sebuah kelompok menyebarkan kabar dan mempertahankan semangat kebangsaan melalui pertemuan rahasia tanpa bergabung dengan organisasi resmi Jepang. Strategi ini disebut ...",
+      "options": [
+        "Perlawanan bawah tanah atau nonkooperatif",
+        "Strategi kooperatif dalam lembaga resmi",
+        "Mobilisasi semi-militer Jepang",
+        "Diplomasi resmi pemerintah pendudukan"
+      ],
+      "answer": 0,
+      "explanation": "Gerakan bawah tanah dilakukan secara rahasia di luar lembaga resmi Jepang. Tujuannya menjaga jaringan dan semangat perlawanan."
+    },
+    {
+      "topic": "Kooperatif dan nonkooperatif",
+      "level": "Menengah",
+      "question": "Apa perbedaan utama strategi kooperatif dan nonkooperatif pada masa pendudukan Jepang?",
+      "options": [
+        "Kooperatif memanfaatkan ruang lembaga resmi, sedangkan nonkooperatif bergerak di luar lembaga resmi dan sering secara rahasia",
+        "Kooperatif selalu berarti mendukung Jepang, sedangkan nonkooperatif selalu berarti perlawanan bersenjata",
+        "Kooperatif dilakukan hanya oleh tentara, sedangkan nonkooperatif hanya oleh pejabat Jepang",
+        "Keduanya berarti bekerja dalam organisasi militer Jepang"
+      ],
+      "answer": 0,
+      "explanation": "Strategi kooperatif memakai ruang organisasi atau lembaga yang ada untuk kepentingan bangsa, sementara nonkooperatif menolak jalur resmi dan dapat dilakukan melalui jaringan bawah tanah."
+    },
+    {
+      "topic": "Perlawanan daerah",
+      "level": "Dasar",
+      "question": "Perlawanan PETA di Blitar pada Februari 1945 berkaitan dengan tokoh ...",
+      "options": [
+        "Supriyadi",
+        "K.H. Zainal Mustafa",
+        "Teungku Abdul Jalil",
+        "Soekarno"
+      ],
+      "answer": 0,
+      "explanation": "Pemberontakan PETA di Blitar pada 14 Februari 1945 dipimpin oleh Supriyadi dan rekan-rekannya."
+    },
+    {
+      "topic": "Perlawanan daerah",
+      "level": "Menengah",
+      "question": "Tokoh yang memimpin perlawanan terhadap Jepang di Singaparna, Tasikmalaya, adalah ...",
+      "options": [
+        "K.H. Zainal Mustafa",
+        "Supriyadi",
+        "Mohammad Hatta",
+        "Ki Hajar Dewantara"
+      ],
+      "answer": 0,
+      "explanation": "K.H. Zainal Mustafa memimpin perlawanan di Singaparna pada 1944."
+    },
+    {
+      "topic": "BPUPKI",
+      "level": "Dasar",
+      "question": "Apa tujuan utama pembentukan BPUPKI?",
+      "options": [
+        "Menyelidiki dan membahas hal-hal penting untuk persiapan kemerdekaan Indonesia",
+        "Mengatur perdagangan Jepang dengan negara-negara Eropa",
+        "Menggantikan seluruh pemerintahan daerah dengan tentara Sekutu",
+        "Membentuk organisasi pemuda untuk membantu perang Jepang"
+      ],
+      "answer": 0,
+      "explanation": "BPUPKI dibentuk untuk menyelidiki dan membahas berbagai hal penting yang diperlukan dalam persiapan kemerdekaan."
+    },
+    {
+      "topic": "BPUPKI",
+      "level": "Dasar",
+      "question": "Siapa ketua BPUPKI?",
+      "options": [
+        "Dr. Radjiman Wedyodiningrat",
+        "Ir. Soekarno",
+        "Mohammad Hatta",
+        "Achmad Soebardjo"
+      ],
+      "answer": 0,
+      "explanation": "Ketua BPUPKI adalah Dr. K.R.T. Radjiman Wedyodiningrat."
+    },
+    {
+      "topic": "BPUPKI",
+      "level": "Menengah",
+      "question": "Apa pokok pembahasan utama dalam sidang pertama BPUPKI pada 29 Mei–1 Juni 1945?",
+      "options": [
+        "Dasar negara Indonesia merdeka",
+        "Pembagian wilayah pendudukan Sekutu",
+        "Pemilihan presiden dan wakil presiden setelah 1949",
+        "Pembentukan kabinet pertama pada 1945"
+      ],
+      "answer": 0,
+      "explanation": "Sidang pertama BPUPKI membahas dasar negara. Gagasan dasar negara disampaikan oleh beberapa tokoh, termasuk Mohammad Yamin, Soepomo, dan Soekarno."
+    },
+    {
+      "topic": "PPKI",
+      "level": "Menengah",
+      "question": "Mengapa BPUPKI kemudian dibubarkan dan digantikan oleh PPKI?",
+      "options": [
+        "Tahap penyelidikan dan perumusan awal selesai, sehingga diperlukan panitia untuk melanjutkan persiapan konkret kemerdekaan",
+        "BPUPKI menolak membahas kemerdekaan dan meminta Belanda kembali",
+        "PPKI dibentuk untuk mengawasi pemilu setelah kemerdekaan 1950",
+        "BPUPKI dibubarkan karena seluruh anggotanya menjadi tentara Sekutu"
+      ],
+      "answer": 0,
+      "explanation": "Setelah BPUPKI menyelesaikan tahap pembahasan awal, PPKI dibentuk pada 7 Agustus 1945 untuk melanjutkan persiapan konkret menuju kemerdekaan dan pembentukan negara."
+    },
+    {
+      "topic": "Kekalahan Jepang",
+      "level": "Sulit",
+      "question": "Rangkaian peristiwa yang mempercepat keputusan Jepang menyerah kepada Sekutu pada Agustus 1945 adalah ...",
+      "options": [
+        "Pengeboman Hiroshima dan Nagasaki, serangan Soviet, serta kekalahan Jepang di berbagai front",
+        "Pembentukan PUTERA, pembukaan sekolah, dan rapat BPUPKI",
+        "Perjanjian Kanagawa, Restorasi Meiji, dan pengiriman pelajar ke Eropa",
+        "Pemberontakan PETA Blitar dan pembentukan Seinendan saja"
+      ],
+      "answer": 0,
+      "explanation": "Jepang menghadapi tekanan besar setelah bom atom di Hiroshima dan Nagasaki, serangan Soviet ke Manchuria, serta kemunduran militer di berbagai front."
+    },
+    {
+      "topic": "Dalat",
+      "level": "Menengah",
+      "question": "Siapa tiga tokoh Indonesia yang dipanggil untuk bertemu Marsekal Terauchi di Dalat, Vietnam, pada Agustus 1945?",
+      "options": [
+        "Soekarno, Mohammad Hatta, dan Radjiman Wedyodiningrat",
+        "Soekarno, Sutan Sjahrir, dan Wikana",
+        "Mohammad Hatta, Sayuti Melik, dan Chaerul Saleh",
+        "Radjiman Wedyodiningrat, Supriyadi, dan Ki Hajar Dewantara"
+      ],
+      "answer": 0,
+      "explanation": "Tokoh Indonesia yang bertemu Terauchi di Dalat adalah Soekarno, Mohammad Hatta, dan Dr. Radjiman Wedyodiningrat."
+    },
+    {
+      "topic": "Golongan Muda dan Tua",
+      "level": "Menengah",
+      "question": "Apa alasan mendasar golongan muda menolak proklamasi menunggu tanggal yang dijanjikan Jepang dan tidak ingin melalui PPKI?",
+      "options": [
+        "Mereka ingin kemerdekaan diputuskan bangsa Indonesia sendiri, bukan tampak sebagai hadiah atau keputusan Jepang",
+        "Mereka ingin Indonesia tetap menjadi bagian dari pemerintahan Jepang",
+        "Mereka menolak kemerdekaan dan ingin menunggu Belanda kembali",
+        "Mereka ingin menyerahkan penyusunan proklamasi kepada Sekutu"
+      ],
+      "answer": 0,
+      "explanation": "Golongan muda menilai kemerdekaan adalah hak bangsa Indonesia dan harus diproklamasikan atas keputusan sendiri, tanpa bergantung pada janji Jepang atau lembaga bentukan Jepang."
+    },
+    {
+      "topic": "Rapat 15 Agustus",
+      "level": "Sulit",
+      "question": "Apa inti keputusan rapat golongan muda yang dipimpin Chaerul Saleh pada 15 Agustus 1945?",
+      "options": [
+        "Kemerdekaan harus diproklamasikan segera oleh bangsa Indonesia sendiri, tidak bergantung pada Jepang atau PPKI",
+        "Proklamasi harus ditunda sampai Sekutu tiba di Jakarta",
+        "Indonesia harus menerima kembali pemerintahan kolonial Belanda",
+        "PPKI harus meminta izin kepada Marsekal Terauchi sebelum bersidang"
+      ],
+      "answer": 0,
+      "explanation": "Rapat tersebut menegaskan bahwa kemerdekaan merupakan hak bangsa Indonesia dan harus dinyatakan segera tanpa bergantung pada keputusan Jepang."
+    },
+    {
+      "topic": "Rengasdengklok",
+      "level": "Dasar",
+      "question": "Peristiwa apa yang menjadi pemicu utama ketegangan antara golongan muda dan golongan tua menjelang Rengasdengklok?",
+      "options": [
+        "Berita Jepang menyerah kepada Sekutu pada 15 Agustus 1945",
+        "Pembentukan Gerakan 3A pada 1942",
+        "Pembukaan sidang pertama BPUPKI pada Mei 1945",
+        "Kedatangan Komodor Perry ke Jepang"
+      ],
+      "answer": 0,
+      "explanation": "Berita menyerahnya Jepang menciptakan situasi politik yang mendesak. Golongan muda ingin memproklamasikan kemerdekaan segera, sementara golongan tua lebih berhati-hati."
+    },
+    {
+      "topic": "Rengasdengklok",
+      "level": "Menengah",
+      "question": "Apa tujuan golongan muda membawa Soekarno dan Hatta ke Rengasdengklok pada 16 Agustus 1945?",
+      "options": [
+        "Menjauhkan mereka dari pengaruh Jepang dan mendesak proklamasi segera",
+        "Menyembunyikan mereka dari rakyat Indonesia hingga Jepang kembali berkuasa",
+        "Membatalkan rencana kemerdekaan Indonesia",
+        "Memindahkan sidang PPKI secara permanen ke Karawang"
+      ],
+      "answer": 0,
+      "explanation": "Golongan muda membawa Soekarno-Hatta ke Rengasdengklok agar keduanya tidak dipengaruhi Jepang dan bersedia memproklamasikan kemerdekaan segera."
+    },
+    {
+      "topic": "Kesepakatan kembali ke Jakarta",
+      "level": "Sulit",
+      "question": "Apa kesepakatan yang memungkinkan Soekarno dan Hatta kembali dari Rengasdengklok ke Jakarta?",
+      "options": [
+        "Achmad Soebardjo memberi jaminan bahwa proklamasi akan dilaksanakan pada 17 Agustus 1945",
+        "Wikana menyetujui penundaan kemerdekaan hingga tahun berikutnya",
+        "Jepang meminta Soekarno-Hatta memimpin kembali pemerintahan militer",
+        "Sekutu menjamin Indonesia akan merdeka setelah perang selesai"
+      ],
+      "answer": 0,
+      "explanation": "Achmad Soebardjo memberikan jaminan bahwa proklamasi akan dilaksanakan pada 17 Agustus 1945. Kesepakatan ini membuat golongan muda mengizinkan Soekarno-Hatta kembali ke Jakarta."
+    },
+    {
+      "topic": "Rumah Laksamana Maeda",
+      "level": "Menengah",
+      "question": "Mengapa rumah Laksamana Tadashi Maeda dipilih sebagai tempat perumusan naskah proklamasi?",
+      "options": [
+        "Tempat itu relatif aman dan Maeda memberi ruang serta perlindungan bagi pertemuan",
+        "Rumah itu merupakan kantor resmi BPUPKI untuk sidang kedua",
+        "Rumah itu telah ditetapkan sebagai lokasi pembacaan proklamasi di hadapan rakyat",
+        "Rumah itu adalah kediaman Soekarno sejak masa kecil"
+      ],
+      "answer": 0,
+      "explanation": "Rumah Maeda dipilih karena relatif aman untuk pertemuan dan Maeda memberi ruang serta perlindungan. Naskah dirumuskan di sana, bukan dibacakan di sana."
+    },
+    {
+      "topic": "Proklamasi",
+      "level": "Dasar",
+      "question": "Di mana teks Proklamasi Kemerdekaan Indonesia dibacakan pada 17 Agustus 1945?",
+      "options": [
+        "Jalan Pegangsaan Timur No. 56, Jakarta",
+        "Rumah Laksamana Maeda di Jakarta",
+        "Gedung Pancasila di Jakarta",
+        "Dalat, Vietnam"
+      ],
+      "answer": 0,
+      "explanation": "Soekarno membacakan Proklamasi pada 17 Agustus 1945 di Jalan Pegangsaan Timur No. 56, Jakarta."
+    },
+    {
+      "topic": "Nilai Rengasdengklok",
+      "level": "Menengah",
+      "question": "Nilai moral yang paling tepat dipetik dari perbedaan pendapat menjelang Proklamasi dan penyelesaian Peristiwa Rengasdengklok adalah ...",
+      "options": [
+        "Perbedaan strategi dapat diselesaikan melalui dialog dan mengutamakan kepentingan bersama",
+        "Setiap perbedaan harus diselesaikan dengan memaksakan pendapat sendiri",
+        "Tujuan bersama tidak penting jika terdapat perbedaan generasi",
+        "Keputusan besar sebaiknya hanya dibuat oleh satu kelompok"
+      ],
+      "answer": 0,
+      "explanation": "Peristiwa tersebut menunjukkan bahwa perbedaan pandangan dapat dijembatani melalui perundingan, tanggung jawab, dan kepentingan bangsa yang lebih besar."
+    },
+    {
+      "topic": "Organisasi bentukan Jepang",
+      "level": "Menengah",
+      "question": "Organisasi manakah yang dibentuk untuk melatih para pemuda dalam kedisiplinan dan kesiapan membantu pertahanan?",
+      "options": [
+        "Seinendan",
+        "Keibodan",
+        "Fujinkai",
+        "PUTERA"
+      ],
+      "answer": 0,
+      "explanation": "Seinendan merupakan barisan pemuda yang diarahkan untuk latihan kedisiplinan dan pertahanan. Keibodan lebih berkaitan dengan bantuan keamanan/kepolisian, sedangkan Fujinkai adalah organisasi perempuan."
+    },
+    {
+      "topic": "Dalat",
+      "level": "Sulit",
+      "question": "Apa pokok tujuan pemanggilan Soekarno, Mohammad Hatta, dan Radjiman Wedyodiningrat untuk bertemu Marsekal Terauchi di Dalat?",
+      "options": [
+        "Membicarakan rencana kemerdekaan Indonesia dan persiapan yang akan dilakukan melalui PPKI",
+        "Meminta ketiga tokoh memimpin pasukan Jepang di Pasifik",
+        "Membatalkan seluruh rencana kemerdekaan Indonesia",
+        "Menyerahkan wilayah Indonesia kepada pemerintahan Belanda sebelum Jepang menyerah"
+      ],
+      "answer": 0,
+      "explanation": "Pertemuan di Dalat membahas rencana kemerdekaan Indonesia dan persiapan melalui PPKI. Setelah Jepang menyerah, para tokoh Indonesia memperdebatkan apakah proklamasi perlu segera dilakukan tanpa menunggu jalur yang dijanjikan Jepang."
+    },
+    {
+      "topic": "Organisasi Jepang",
+      "level": "Menengah",
+      "question": "Organisasi bentukan Jepang yang bertugas membantu pekerjaan keamanan dan kepolisian adalah ...",
+      "options": [
+        "Keibodan",
+        "Seinendan",
+        "Fujinkai",
+        "PUTERA"
+      ],
+      "answer": 0,
+      "explanation": "Keibodan merupakan barisan pembantu polisi untuk membantu tugas keamanan. Seinendan adalah barisan pemuda, Fujinkai adalah organisasi perempuan, dan PUTERA merupakan organisasi mobilisasi rakyat."
+    },
+    {
+      "topic": "Strategi perlawanan",
+      "level": "Sulit",
+      "question": "Para tokoh nasionalis memanfaatkan lembaga bentukan Jepang untuk berbicara kepada masyarakat dan menumbuhkan kesadaran kebangsaan. Strategi ini termasuk ...",
+      "options": [
+        "Kooperatif",
+        "Bawah tanah",
+        "Perlawanan bersenjata",
+        "Netral tanpa kegiatan"
+      ],
+      "answer": 0,
+      "explanation": "Strategi kooperatif berarti memanfaatkan ruang organisasi atau lembaga resmi yang ada. Tokoh nasionalis dapat memakai ruang tersebut untuk kepentingan bangsa meskipun lembaganya dibentuk oleh Jepang."
+    }
+  ],
+  "essays": [
+    {
+      "title": "Tiga faktor kedatangan Jepang ke Indonesia",
+      "prompt": "Sebutkan dan jelaskan tiga faktor utama yang mendorong Jepang datang dan menduduki Indonesia.",
+      "criteria": [
+        "Kebutuhan sumber daya alam, terutama minyak bumi, karet, dan bahan mentah untuk industri serta perang.",
+        "Letak Indonesia yang strategis bagi jalur pelayaran, pangkalan militer, dan penguasaan Asia Tenggara.",
+        "Ambisi ekspansi Jepang untuk memperluas kekuasaan dan membangun dominasi kawasan Asia Timur Raya.",
+        "Jawaban menjelaskan hubungan faktor-faktor tersebut dengan kepentingan perang Jepang, bukan hanya menyebutkan daftar."
+      ]
+    },
+    {
+      "title": "Pernyataan sesuai dan tidak sesuai tentang pendudukan Jepang",
+      "prompt": "Tentukan apakah pernyataan berikut SESUAI atau TIDAK SESUAI dengan kondisi pendudukan Jepang di Indonesia. Berikan alasan dan perbaiki pernyataan yang tidak sesuai.\n\nA. Jepang menggunakan propaganda sebagai sesama bangsa Asia untuk menarik simpati rakyat.\nB. Pendudukan Jepang menghapus seluruh bentuk kerja paksa dan menjamin kebebasan rakyat.\nC. Jepang membentuk organisasi militer dan semi-militer untuk mendukung kepentingan perang.\nD. Pendudukan Jepang menimbulkan penderitaan, antara lain melalui romusha dan pengerahan hasil pertanian.",
+      "criteria": [
+        "A: SESUAI. Propaganda Jepang menonjolkan slogan pembebasan Asia dan Gerakan 3A.",
+        "B: TIDAK SESUAI. Romusha dan pengerahan tenaga secara paksa justru terjadi dan menimbulkan penderitaan.",
+        "C: SESUAI. Contohnya PETA, Heiho, Seinendan, dan Keibodan.",
+        "D: SESUAI. Kebijakan ekonomi dan tenaga kerja Jepang menimbulkan kesulitan bagi rakyat."
+      ]
+    },
+    {
+      "title": "BPUPKI: pengertian, tokoh, dan tujuan",
+      "prompt": "Jelaskan pengertian BPUPKI, tokoh yang memimpinnya, serta tujuan pembentukannya. Sertakan satu contoh pokok pembahasan dalam sidang BPUPKI.",
+      "criteria": [
+        "BPUPKI merupakan singkatan dari Badan Penyelidik Usaha-usaha Persiapan Kemerdekaan Indonesia; nama Jepangnya Dokuritsu Junbi Cosakai.",
+        "Ketua BPUPKI adalah Dr. Radjiman Wedyodiningrat. Tokoh penting lain dapat disebutkan sesuai materi.",
+        "Tujuannya menyelidiki dan membahas hal-hal penting bagi persiapan kemerdekaan Indonesia.",
+        "Contoh pembahasan: dasar negara pada sidang pertama atau rancangan UUD pada sidang kedua."
+      ]
+    },
+    {
+      "title": "Konflik pandangan Golongan Muda dan Golongan Tua",
+      "prompt": "Jelaskan perbedaan pandangan Golongan Muda dan Golongan Tua mengenai waktu serta cara memproklamasikan kemerdekaan Indonesia. Mengapa keduanya sebenarnya memiliki tujuan akhir yang sama?",
+      "criteria": [
+        "Golongan Muda ingin proklamasi segera dilakukan atas keputusan bangsa Indonesia sendiri, tanpa bergantung pada Jepang atau PPKI.",
+        "Golongan Tua cenderung memilih langkah hati-hati dan mempertimbangkan jalur PPKI, keselamatan rakyat, serta situasi politik.",
+        "Keduanya sama-sama menginginkan Indonesia merdeka; perbedaannya terletak pada strategi, waktu, dan cara.",
+        "Jawaban menjelaskan alasan di balik masing-masing pandangan, bukan sekadar menyebut nama golongan."
+      ]
+    },
+    {
+      "title": "Refleksi kolaborasi lintas kompetensi",
+      "prompt": "Proklamasi didukung oleh berbagai peran, seperti pemimpin, golongan muda, jurnalis, fotografer, teknisi radio, tokoh agama, pengusaha, dan masyarakat. Jelaskan bagaimana kolaborasi berbagai kompetensi tersebut mendukung perjuangan. Kemudian berikan contoh penerapannya dalam dunia kerja masa kini sesuai bidang kejuruanmu.",
+      "criteria": [
+        "Menjelaskan bahwa setiap profesi memiliki kontribusi berbeda tetapi saling melengkapi.",
+        "Memberikan contoh peran konkret, misalnya komunikasi, dokumentasi, penyebaran informasi, koordinasi, atau dukungan logistik.",
+        "Menghubungkan nilai sejarah dengan dunia kerja masa kini: kerja sama, komunikasi, pembagian tanggung jawab, kreativitas, dan saling menghargai keahlian.",
+        "Memberikan contoh yang jelas dan relevan dengan bidang kejuruan, bukan hanya menyebut kata 'kolaborasi'."
+      ]
+    }
+  ]
+};
+
+  const AI_PROMPT = `Bertindaklah sebagai guru Sejarah dan penyusun bahan belajar. Baca seluruh kisi-kisi, PDF, foto, atau teks materi yang saya kirim.
+
+TUJUAN: Buat bahan belajar yang mengikuti indikator pada dokumen. Jangan melewatkan indikator. Pertahankan istilah dan urutan materi sumber. Jika file hanya berisi kisi-kisi, jelaskan topik berdasarkan pengetahuan sejarah yang dapat dipertanggungjawabkan dan tandai bagian yang perlu dicocokkan dengan buku/guru. Jangan mengarang kutipan atau fakta khusus dari dokumen.
+
+KELUARAN WAJIB: Berikan HANYA JSON valid, tanpa Markdown dan tanpa code fence, dengan struktur:
+{
+  "title": "Judul materi",
+  "subtitle": "Deskripsi dan cakupan sumber",
+  "lessons": [
+    {"title":"Judul kartu", "tag":"SUBTOPIK", "content":"Penjelasan runtut", "example":"Contoh", "key":"Poin penting"}
+  ],
+  "questions": [
+    {"topic":"Subtopik", "level":"Dasar/Menengah/Sulit", "question":"Pertanyaan", "options":["A","B","C","D"], "answer":0, "explanation":"Pembahasan"}
+  ],
+  "essays": [
+    {"title":"Judul uraian", "prompt":"Instruksi soal uraian", "criteria":["Poin jawaban 1","Poin jawaban 2"]}
+  ]
+}
+
+ATURAN:
+1. Buat 6–14 kartu materi. Satu kartu membahas satu subtopik, dari dasar ke lanjutan. Jelaskan istilah, tokoh, kronologi, sebab-akibat, dan dampak yang relevan.
+2. Buat 10–25 soal pilihan ganda. Setiap soal HARUS mempunyai tepat satu jawaban benar dan empat pilihan yang masuk akal. Jangan membuat multiple answer.
+3. "answer" adalah indeks jawaban benar yang dimulai dari 0: 0 untuk pilihan pertama, 1 untuk kedua, 2 untuk ketiga, 3 untuk keempat.
+4. Berikan pembahasan yang menunjukkan mengapa jawaban benar. Pastikan tidak ada pilihan lain yang juga benar.
+5. Buat 2–6 soal uraian jika kisi-kisi memuat indikator uraian. Isi "criteria" dengan unsur-unsur yang perlu muncul dalam jawaban, bukan karangan jawaban panjang.
+6. Gunakan bahasa Indonesia yang jelas. Berikan contoh dan poin ingat pada setiap kartu jika sesuai.
+7. Semua soal harus langsung menguji indikator kisi-kisi dan tidak boleh menjebak melalui kalimat ambigu.
+8. Jika indikator atau bagian sumber tidak terbaca, jangan menebak; jelaskan keterbatasannya di subtitle atau kartu yang relevan.
+9. Periksa ulang ejaan nama tokoh, tanggal, kronologi, dan validitas JSON. Pastikan hanya satu jawaban benar pada setiap soal pilihan ganda.
+
+Kirim hanya objek JSON final yang valid.`;
+
+  const $ = id => document.getElementById(id);
+  const STORAGE_KEY = 'ruangBelajarSejarahXI2026V1';
+  const ESSAY_DRAFT_KEY = 'ruangBelajarSejarahXI2026EssayDraftsV1';
+  let data = loadSavedData();
+  let lessonIndex = 0;
+  let quizIndex = 0;
+  let answers = [];
+  let checked = false;
+  let finalScore = null;
+  let activeTab = 'lessons';
+  let modalMode = 'prompt';
+  let pointerStartX = null;
+
+  function validateData(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('Data harus berupa objek JSON.');
+    if (!Array.isArray(obj.lessons) || obj.lessons.length < 1) throw new Error('Bagian "lessons" harus berisi minimal satu kartu materi.');
+    if (!Array.isArray(obj.questions) || obj.questions.length < 1) throw new Error('Bagian "questions" harus berisi minimal satu soal.');
+    obj.lessons.forEach((lesson, i) => {
+      if (!lesson || typeof lesson.title !== 'string' || !lesson.title.trim()) throw new Error(`Kartu materi nomor ${i + 1} belum memiliki judul.`);
+      if (typeof lesson.content !== 'string' || !lesson.content.trim()) throw new Error(`Kartu materi nomor ${i + 1} belum memiliki penjelasan.`);
+    });
+    if (!Array.isArray(obj.essays)) obj.essays = [];
+    obj.essays.forEach((essay, i) => {
+      if (!essay || typeof essay.prompt !== 'string' || !essay.prompt.trim()) throw new Error(`Soal uraian nomor ${i + 1} belum memiliki instruksi.`);
+      if (!Array.isArray(essay.criteria)) essay.criteria = [];
+    });
+    obj.questions.forEach((q, i) => {
+      if (!q || typeof q.question !== 'string' || !q.question.trim()) throw new Error(`Soal nomor ${i + 1} belum memiliki pertanyaan.`);
+      if (!Array.isArray(q.options) || q.options.length < 2 || q.options.some(option => typeof option !== 'string' || !option.trim())) throw new Error(`Soal nomor ${i + 1} harus memiliki minimal dua pilihan teks.`);
+      if (new Set(q.options.map(option => option.trim().toLowerCase())).size !== q.options.length) throw new Error(`Soal nomor ${i + 1} memiliki pilihan jawaban yang duplikat.`);
+      if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= q.options.length) throw new Error(`Jawaban soal nomor ${i + 1} harus berupa satu indeks angka yang valid, dimulai dari 0.`);
+    });
+    return obj;
+  }
+
+  function loadSavedData() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? validateData(JSON.parse(saved)) : demo;
+    } catch (error) {
+      return demo;
+    }
+  }
+
+  function saveData() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    catch (error) { setImportStatus('Materi berhasil dimuat, tetapi browser tidak bisa menyimpannya. Ekspor JSON sebagai cadangan.', true); }
+  }
+
+  function setTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab').forEach(button => button.classList.toggle('active', button.dataset.tab === tab));
+    $('lessonsView').classList.toggle('hidden', tab !== 'lessons');
+    $('quizView').classList.toggle('hidden', tab !== 'quiz');
+    $('essaysView').classList.toggle('hidden', tab !== 'essays');
+    $('resultsView').classList.toggle('hidden', tab !== 'results');
+    if (tab === 'quiz') renderQuiz();
+    if (tab === 'essays') renderEssays();
+    if (tab === 'results') renderResults();
+  }
+
+  function renderHeader() {
+    $('pageTitle').textContent = data.title || 'Ruang Belajar';
+    $('pageSubtitle').textContent = data.subtitle || 'Pelajari materi dan uji pemahamanmu.';
+    $('lessonMeta').textContent = `${data.lessons.length} kartu materi`;
+    $('questionMeta').textContent = `${data.questions.length} soal pilihan ganda`;
+    const essayMeta = $('essayMeta'); if (essayMeta) essayMeta.textContent = `${(data.essays || []).length} soal uraian`;
+  }
+
+  function renderLessons() {
+    const lesson = data.lessons[lessonIndex];
+    renderHeader();
+    $('lessonTag').textContent = lesson.tag || 'MATERI';
+    $('lessonTitle').textContent = lesson.title;
+    $('lessonContent').textContent = lesson.content;
+    $('lessonExample').textContent = lesson.example || '';
+    $('lessonKey').textContent = lesson.key || '';
+    $('exampleBox').classList.toggle('hidden', !lesson.example);
+    $('keyBox').classList.toggle('hidden', !lesson.key);
+    $('lessonNumber').textContent = `KARTU ${String(lessonIndex + 1).padStart(2, '0')}`;
+    $('lessonCount').textContent = `${lessonIndex + 1} / ${data.lessons.length}`;
+    $('lessonProgress').style.width = `${((lessonIndex + 1) / data.lessons.length) * 100}%`;
+    $('prevLesson').disabled = lessonIndex === 0;
+    $('nextLesson').textContent = lessonIndex === data.lessons.length - 1 ? 'Mulai kuis →' : 'Berikutnya →';
+    $('lessonDots').replaceChildren();
+    data.lessons.forEach((_, index) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = `dot${index === lessonIndex ? ' active' : ''}`;
+      dot.setAttribute('aria-label', `Buka kartu ${index + 1}`);
+      dot.setAttribute('aria-current', index === lessonIndex ? 'step' : 'false');
+      dot.addEventListener('click', () => { lessonIndex = index; renderLessons(); });
+      $('lessonDots').append(dot);
+    });
+  }
+
+  function moveLesson(direction) {
+    if (direction > 0 && lessonIndex === data.lessons.length - 1) { setTab('quiz'); return; }
+    lessonIndex = Math.max(0, Math.min(data.lessons.length - 1, lessonIndex + direction));
+    renderLessons();
+  }
+
+  function renderQuiz() {
+    if (!data.questions.length) {
+      $('quizMount').className = 'empty-card';
+      $('quizMount').textContent = 'Belum ada soal. Masukkan materi dan soal dari AI terlebih dahulu.';
+      return;
+    }
+    const q = data.questions[quizIndex];
+    $('quizMount').className = '';
+    $('quizCount').textContent = `Soal ${quizIndex + 1} / ${data.questions.length}`;
+    $('quizProgress').style.width = `${((quizIndex + 1) / data.questions.length) * 100}%`;
+    const mount = $('quizMount');
+    mount.replaceChildren();
+
+    const card = document.createElement('div');
+    card.className = 'quiz-card';
+    const meta = document.createElement('div');
+    meta.className = 'q-meta';
+    const questionNumber = document.createElement('span');
+    questionNumber.textContent = `PERTANYAAN ${String(quizIndex + 1).padStart(2, '0')} · ${q.level || 'LATIHAN'}`;
+    const answered = document.createElement('span');
+    answered.textContent = `${answers.filter(answer => answer !== null).length} / ${data.questions.length} dijawab`;
+    meta.append(questionNumber, answered);
+
+    const title = document.createElement('h3');
+    title.textContent = q.question;
+    const options = document.createElement('div');
+    options.className = 'options';
+    q.options.forEach((option, index) => {
+      const label = document.createElement('label');
+      label.className = 'option';
+      if (answers[quizIndex] === index) label.classList.add('selected');
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'current-answer';
+      input.value = String(index);
+      input.checked = answers[quizIndex] === index;
+      input.disabled = checked;
+      input.setAttribute('aria-label', `Pilihan ${String.fromCharCode(65 + index)}`);
+      input.addEventListener('change', () => {
+        answers[quizIndex] = index;
+        renderQuiz();
+      });
+      const text = document.createElement('span');
+      text.className = 'option-text';
+      text.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+      label.append(input, text);
+      if (checked && index === q.answer) label.classList.add('correct');
+      if (checked && answers[quizIndex] === index && index !== q.answer) label.classList.add('wrong');
+      options.append(label);
+    });
+    card.append(meta, title, options);
+
+    if (checked) {
+      const feedback = document.createElement('div');
+      feedback.className = 'feedback show';
+      const isCorrect = answers[quizIndex] === q.answer;
+      const heading = document.createElement('strong');
+      heading.textContent = isCorrect ? 'Benar!' : 'Belum tepat.';
+      heading.style.color = isCorrect ? 'var(--good)' : 'var(--bad)';
+      const explanation = document.createElement('p');
+      explanation.textContent = q.explanation || `Jawaban yang benar: ${q.options[q.answer]}`;
+      feedback.append(heading, explanation);
+      card.append(feedback);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'quiz-actions';
+    const back = document.createElement('button');
+    back.className = 'btn';
+    back.type = 'button';
+    back.textContent = '← Sebelumnya';
+    back.disabled = quizIndex === 0;
+    back.addEventListener('click', () => { quizIndex -= 1; checked = false; renderQuiz(); });
+    const next = document.createElement('button');
+    next.className = 'btn primary';
+    next.type = 'button';
+    if (!checked) {
+      next.textContent = 'Periksa jawaban';
+      next.disabled = answers[quizIndex] === null;
+      next.addEventListener('click', () => { checked = true; renderQuiz(); });
+    } else if (quizIndex === data.questions.length - 1) {
+      next.textContent = 'Lihat hasil →';
+      next.addEventListener('click', finishQuiz);
+    } else {
+      next.textContent = 'Soal berikutnya →';
+      next.addEventListener('click', () => { quizIndex += 1; checked = false; renderQuiz(); });
+    }
+    actions.append(back, next);
+    card.append(actions);
+    mount.append(card);
+  }
+
+  function finishQuiz() {
+    const correct = data.questions.reduce((sum, question, index) => sum + (answers[index] === question.answer ? 1 : 0), 0);
+    finalScore = { correct, total: data.questions.length, percent: Math.round((correct / data.questions.length) * 100) };
+    setTab('results');
+  }
+
+  let essayDrafts = (() => {
+    try { return JSON.parse(localStorage.getItem(ESSAY_DRAFT_KEY) || '{}'); }
+    catch (error) { return {}; }
+  })();
+  const openEssayGuides = new Set();
+
+  function renderEssays() {
+    const mount = $('essaysMount');
+    mount.replaceChildren();
+    const essays = data.essays || [];
+    $('essayCount').textContent = `${essays.length} soal`;
+    if (!essays.length) {
+      mount.className = 'empty-card';
+      mount.textContent = 'Belum ada soal uraian. Tambahkan bagian "essays" melalui menu Masukkan materi.';
+      return;
+    }
+    mount.className = 'essay-list';
+    essays.forEach((essay, index) => {
+      const card = document.createElement('article');
+      card.className = 'essay-card';
+      const meta = document.createElement('div');
+      meta.className = 'q-meta';
+      const left = document.createElement('span');
+      left.textContent = `URAIAN ${String(index + 1).padStart(2, '0')}`;
+      const right = document.createElement('span');
+      right.textContent = essay.topic || 'Latihan analisis';
+      meta.append(left, right);
+      const title = document.createElement('h3');
+      title.textContent = essay.title || `Soal uraian ${index + 1}`;
+      const prompt = document.createElement('p');
+      prompt.className = 'essay-prompt';
+      prompt.textContent = essay.prompt;
+      const textarea = document.createElement('textarea');
+      textarea.className = 'essay-answer';
+      textarea.placeholder = 'Tulis jawabanmu di sini. Jawaban tersimpan otomatis di browser ini...';
+      textarea.value = essayDrafts[index] || '';
+      textarea.setAttribute('aria-label', `Jawaban uraian ${index + 1}`);
+      const actions = document.createElement('div');
+      actions.className = 'essay-card-actions';
+      const status = document.createElement('span');
+      status.className = 'essay-status';
+      status.textContent = textarea.value ? 'Jawaban tersimpan di perangkat ini.' : 'Belum ada jawaban.';
+      textarea.addEventListener('input', () => {
+        essayDrafts[index] = textarea.value;
+        try { localStorage.setItem(ESSAY_DRAFT_KEY, JSON.stringify(essayDrafts)); status.textContent = 'Tersimpan otomatis.'; }
+        catch (error) { status.textContent = 'Penyimpanan browser tidak tersedia.'; }
+      });
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'btn';
+      toggle.textContent = openEssayGuides.has(index) ? 'Sembunyikan pedoman' : 'Lihat pedoman jawaban';
+      const guide = document.createElement('div');
+      guide.className = `essay-guide${openEssayGuides.has(index) ? ' show' : ''}`;
+      const guideTitle = document.createElement('strong');
+      guideTitle.textContent = 'Poin yang sebaiknya muncul dalam jawaban';
+      const list = document.createElement('ul');
+      (essay.criteria || []).forEach(point => {
+        const li = document.createElement('li');
+        li.textContent = point;
+        list.append(li);
+      });
+      if (!(essay.criteria || []).length) {
+        const li = document.createElement('li');
+        li.textContent = 'Periksa apakah jawaban sudah menjawab seluruh bagian pertanyaan dengan alasan dan contoh yang relevan.';
+        list.append(li);
+      }
+      guide.append(guideTitle, list);
+      toggle.addEventListener('click', () => {
+        if (openEssayGuides.has(index)) openEssayGuides.delete(index); else openEssayGuides.add(index);
+        renderEssays();
+      });
+      actions.append(status, toggle);
+      card.append(meta, title, prompt, textarea, actions, guide);
+      mount.append(card);
+    });
+  }
+
+  function renderResults() {
+    const mount = $('resultMount');
+    mount.replaceChildren();
+    if (!finalScore) {
+      mount.className = 'empty-card';
+      mount.textContent = 'Selesaikan latihan soal untuk melihat hasil dan pembahasanmu.';
+      return;
+    }
+    mount.className = 'result-card';
+    const label = document.createElement('div');
+    label.className = 'eyebrow';
+    label.textContent = 'LATIHAN SELESAI';
+    const score = document.createElement('div');
+    score.className = 'score';
+    score.textContent = `${finalScore.percent}%`;
+    const summary = document.createElement('h2');
+    summary.textContent = `${finalScore.correct} dari ${finalScore.total} jawaban benar`;
+    const advice = document.createElement('p');
+    advice.textContent = finalScore.percent === 100
+      ? 'Semua jawaban benar. Kamu bisa lanjut ke materi atau mencoba soal yang lebih menantang.'
+      : finalScore.percent >= 70
+        ? 'Pemahamanmu cukup baik. Tinjau jawaban yang salah dan perhatikan pembahasannya.'
+        : 'Pelajari kembali kartu materi yang berkaitan dengan jawaban salah, lalu ulangi kuis.';
+    const review = document.createElement('div');
+    review.className = 'review';
+    data.questions.forEach((question, index) => {
+      const item = document.createElement('div');
+      item.className = 'review-item';
+      const title = document.createElement('strong');
+      title.textContent = `${index + 1}. ${question.question}`;
+      const response = document.createElement('p');
+      const wasCorrect = answers[index] === question.answer;
+      response.style.color = wasCorrect ? 'var(--good)' : 'var(--bad)';
+      response.textContent = `Jawabanmu: ${answers[index] === null ? 'Belum dijawab' : question.options[answers[index]]} · Jawaban benar: ${question.options[question.answer]}`;
+      const explanation = document.createElement('p');
+      explanation.textContent = question.explanation || '';
+      item.append(title, response, explanation);
+      review.append(item);
+    });
+    const retry = document.createElement('button');
+    retry.className = 'btn primary';
+    retry.type = 'button';
+    retry.textContent = 'Ulangi kuis';
+    retry.style.marginTop = '22px';
+    retry.addEventListener('click', () => {
+      quizIndex = 0;
+      answers = data.questions.map(() => null);
+      checked = false;
+      finalScore = null;
+      setTab('quiz');
+    });
+    mount.append(label, score, summary, advice, review, retry);
+  }
+
+  function setImportStatus(message, isError = false) {
+    $('importStatus').textContent = message;
+    $('importStatus').classList.toggle('error', isError);
+  }
+
+  function openModal(mode = 'prompt') {
+    $('importModal').classList.add('open');
+    setModalMode(mode);
+    setImportStatus('');
+  }
+
+  function closeModal() {
+    $('importModal').classList.remove('open');
+  }
+
+  function setModalMode(mode) {
+    modalMode = mode;
+    const isPrompt = mode === 'prompt';
+    $('promptPanel').classList.toggle('hidden', !isPrompt);
+    $('jsonPanel').classList.toggle('hidden', isPrompt);
+    $('modalBottom').classList.toggle('hidden', !isPrompt);
+    $('promptModeBtn').classList.toggle('active', isPrompt);
+    $('jsonModeBtn').classList.toggle('active', !isPrompt);
+    $('promptInput').value = AI_PROMPT;
+  }
+
+  function parseJsonInput(raw) {
+    let cleaned = raw.trim();
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    return JSON.parse(cleaned);
+  }
+
+  async function copyPrompt() {
+    const prompt = $('promptInput').value;
+    try {
+      await navigator.clipboard.writeText(prompt);
+      $('promptStatus').textContent = 'Prompt berhasil disalin. Kirim bersama file atau teks materimu ke AI.';
+    } catch (error) {
+      $('promptInput').focus();
+      $('promptInput').select();
+      $('promptStatus').textContent = 'Clipboard browser tidak tersedia. Teks sudah dipilih, tekan Ctrl+C untuk menyalin.';
+    }
+  }
+
+  function importJson() {
+    try {
+      const parsed = validateData(parseJsonInput($('jsonInput').value));
+      data = parsed;
+      saveData();
+      lessonIndex = 0;
+      quizIndex = 0;
+      answers = data.questions.map(() => null);
+      checked = false;
+      finalScore = null;
+      essayDrafts = {}; openEssayGuides.clear();
+      try { localStorage.removeItem(ESSAY_DRAFT_KEY); } catch (error) {}
+      renderLessons();
+      closeModal();
+      setTab('lessons');
+    } catch (error) {
+      setImportStatus(error.message || 'JSON tidak valid. Periksa format hasil AI.', true);
+    }
+  }
+
+  function exportJson() {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${(data.title || 'materi-belajar').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'materi-belajar'}.json`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  document.querySelectorAll('.tab').forEach(button => button.addEventListener('click', () => setTab(button.dataset.tab)));
+  $('prevLesson').addEventListener('click', () => moveLesson(-1));
+  $('nextLesson').addEventListener('click', () => moveLesson(1));
+  $('promptBtn').addEventListener('click', () => openModal('prompt'));
+  $('importBtn').addEventListener('click', () => openModal('json'));
+  $('exportBtn').addEventListener('click', exportJson);
+  $('promptModeBtn').addEventListener('click', () => setModalMode('prompt'));
+  $('jsonModeBtn').addEventListener('click', () => setModalMode('json'));
+  $('goJsonBtn').addEventListener('click', () => setModalMode('json'));
+  $('copyPromptBtn').addEventListener('click', copyPrompt);
+  $('closeModal').addEventListener('click', closeModal);
+  $('closePromptModal').addEventListener('click', closeModal);
+  $('sampleBtn').addEventListener('click', () => { $('jsonInput').value = JSON.stringify(demo, null, 2); setImportStatus('Contoh JSON sudah dimuat. Tekan Terapkan materi untuk melihatnya.'); });
+  $('applyJson').addEventListener('click', importJson);
+  $('importModal').addEventListener('click', event => { if (event.target === $('importModal')) closeModal(); });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeModal();
+    if (activeTab === 'lessons' && !$('importModal').classList.contains('open')) {
+      if (event.key === 'ArrowRight') moveLesson(1);
+      if (event.key === 'ArrowLeft') moveLesson(-1);
+    }
+  });
+  $('lessonCard').addEventListener('pointerdown', event => { pointerStartX = event.clientX; });
+  $('lessonCard').addEventListener('pointerup', event => {
+    if (pointerStartX === null) return;
+    const distance = event.clientX - pointerStartX;
+    if (Math.abs(distance) > 55) moveLesson(distance < 0 ? 1 : -1);
+    pointerStartX = null;
+  });
+  $('lessonCard').addEventListener('pointercancel', () => { pointerStartX = null; });
+
+  $('promptInput').value = AI_PROMPT;
+  answers = data.questions.map(() => null);
+  renderLessons();
+})();
+</script>
+</body>
+</html>
